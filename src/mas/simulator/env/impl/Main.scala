@@ -1,6 +1,5 @@
-package mas.simulator
+package mas.simulator.env.impl
 
-import mas.simulator.env.impl.Starter
 
 /**
  * User: Lugzan

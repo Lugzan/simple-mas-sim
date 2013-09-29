@@ -8,11 +8,18 @@ import mas.simulator.env.Message
 import mas.simulator.env.AgentWithPos
 
 import EnvironmentImpl._
+import scala.collection.mutable
+import scala.util.Random
+import mas.simulator.agent.event.Events.InitEvent
 
 /**
  * User: Lugzan
  */
-class EnvironmentImpl(val linearSize: Int, val receiverLimit: Int, val logger: String => Unit) extends Environment {
+class EnvironmentImpl(val linearSize: Int, val receiverLimit: Int,
+                      val logger: String => Unit, val measureMax: Int = 1000,
+                      val noise: Noise = new SimpleNoiseImpl(2)) extends Environment {
+  private val surface = new mutable.HashMap[(Int, Int), Int]()
+
   private var flag = true
   private var turn = 0
 
@@ -92,7 +99,11 @@ class EnvironmentImpl(val linearSize: Int, val receiverLimit: Int, val logger: S
     } getOrElse Seq.empty
   }
 
-
+  private[impl] def measureFor(point: (Int, Int)): Int = surface get point getOrElse {
+    val value = Random nextInt measureMax
+    surface put (point, value)
+    value
+  }
 
   private class EnvPartImpl(myAgent: AgentWithPos, agents: Seq[AgentInfo]) extends EnvPart {
     val id = myAgent.agent.getId
@@ -126,6 +137,22 @@ class EnvironmentImpl(val linearSize: Int, val receiverLimit: Int, val logger: S
     def moveDown() {
       env move (id, down)
     }
+
+    def measure(): Int = env.measureFor(myAgent.pos) + noise.noise(myAgent.pos)
+
+    def measureWide(): WideMeasure = {
+      val builder = new MeasureBuilder
+      val x: Int = myAgent.pos._1
+
+      for (i <- x - 1 to x + 1; y = myAgent.pos._2; j <- y - 1 to y + 1) {
+        builder.add(env.measureFor((i, j)) + noise.areaNoise(myAgent.pos))
+      }
+      builder.get
+    }
+  }
+
+  def init() {
+    agents.foreach(_.agent.react(InitEvent("")))
   }
 }
 

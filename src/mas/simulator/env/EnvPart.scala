@@ -15,4 +15,7 @@ trait EnvPart {
   def moveRight()
   def moveUp()
   def moveDown()
+
+  def measure(): Int
+  def measureWide(): WideMeasure
 }

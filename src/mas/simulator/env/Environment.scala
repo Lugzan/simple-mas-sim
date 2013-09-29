@@ -9,4 +9,5 @@ trait Environment {
   def addAgent(agent: Agent, initPos: (Int, Int))
 
   def iterate()
+  def init()
 }
