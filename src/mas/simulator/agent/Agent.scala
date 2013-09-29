@@ -5,10 +5,11 @@ import mas.simulator.agent.event.EventConsumer
 
 /**
  * User: Lugzan
- * Date: 16.09.13
- * Time: 0:07
  */
 trait Agent extends EventConsumer {
+  /**
+   * Основные устройства на борту БПЛА, с которыми могут взаимодействовать мозги агента
+   */
   protected val mainComputer: TripComputer
   protected val autopilot: Autopilot
   protected val processingUnit: ProcessingUnit

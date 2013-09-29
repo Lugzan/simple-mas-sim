@@ -3,8 +3,14 @@ package mas.simulator.dumbImpl
 import mas.simulator.agent.{TripComputer, ProcessingUnit, Autopilot, Agent}
 import mas.simulator.env.{WideMeasure, Message, Data, EnvPart}
 import java.util
-import mas.simulator.agent.event.Events.{TimerEvent, InitEvent, AgentEvent}
+import mas.simulator.agent.event.Events._
 import mas.simulator.agent.event.{Events, SingleWireEmitter}
+import mas.simulator.agent.event.Events.TimerEvent
+import mas.simulator.agent.event.Events.InitEvent
+import mas.simulator.env.Message
+import mas.simulator.agent.event.Events.MessagesEvent
+import scala.Some
+import scala.util.Random
 
 /**
  * User: Lugzan
@@ -27,8 +33,14 @@ object Agents {
 
     def react(ev: AgentEvent) {
       ev match {
-        case InitEvent(_) => mainComputer.startTimer(1, "timer")
-        case TimerEvent("timer") => mainComputer.startTimer(1, "timer")
+        case InitEvent(_) =>
+          mainComputer.startTimer(1, "a")
+          autopilot.addPoint((Random.nextInt(100), Random.nextInt(100)))
+        case TimerEvent(a) =>
+          println(a)
+          mainComputer.startTimer(1, a + "a")
+        case LocationEvent(_, _) =>
+          autopilot.addPoint((Random.nextInt(100), Random.nextInt(100)))
         case _ =>
       }
     }
@@ -53,10 +65,15 @@ object Agents {
       this.env = Some(env)
       val position: (Int, Int) = getPosition
 
+
       if (points.isEmpty) return
-      val next = points.getFirst
-      if (position == next) points.pollFirst()
-      if (points.isEmpty) return
+      var next = points.getFirst
+
+      while (!points.isEmpty && position == next) {
+        myConsumer map (_ react LocationEvent(next, ""))
+        points.pollFirst()
+        if (!points.isEmpty) next = points.getFirst
+      }
 
       val xDif = next._1 - position._1
       if (xDif > 0) env.moveUp() else if (xDif < 0) env.moveDown() else {
@@ -106,6 +123,8 @@ object Agents {
         myConsumer map (_ react Events.TimerEvent(min.msg))
         timers remove min
       }
+
+      if (getAllReceived.size != 0) myConsumer map (_ react MessagesEvent(""))
     }
 
     def startTimer(clock: Int, msg: String) {
