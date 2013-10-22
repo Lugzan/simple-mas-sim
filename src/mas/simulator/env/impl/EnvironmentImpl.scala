@@ -44,6 +44,7 @@ class EnvironmentImpl(val linearSize: Int, val receiverLimit: Int,
     flag = !flag
     turn += 1
 
+    logger(s"Iteration #$turn")
     agents foreach {
       case info =>
         val id = info.agent.getId
@@ -57,7 +58,7 @@ class EnvironmentImpl(val linearSize: Int, val receiverLimit: Int,
           case _ =>
         }
 
-        logger(s"Agent #$id is in ${info.pos} now")
+        //logger(s"Agent #$id is in ${info.pos} now")
     }
 
     agents foreach {
@@ -152,7 +153,28 @@ class EnvironmentImpl(val linearSize: Int, val receiverLimit: Int,
   }
 
   def init() {
-    agents.foreach(_.agent.react(InitEvent("")))
+    val targets = Array((43, 29), (11, 45), (33, 1), (21, 21), (17, 5), (13, 43), (1, 49), (9, 30), (44, 19), (17, 9))
+
+    val qt : Int = ((targets.size) / agents.size())
+    val rmd : Int = ((targets.size) % agents.size())
+    val msg = new mutable.StringBuilder("")
+    for(i <- 0 to agents.size() - 1) {
+      msg.clear()
+      for(j <- 0 to qt - 1) {
+        msg.append(targets(j + i * qt)._1)
+        msg.append(" ")
+        msg.append(targets(j + i * qt)._2)
+        msg.append(" ")
+      }
+      if(i < rmd) {
+        msg.append(targets(targets.size - 1 - i)._1)
+        msg.append(" ")
+        msg.append(targets(targets.size - 1 - i)._2)
+        msg.append(" ")
+      }
+      agents.get(i).agent.react(InitEvent(msg.toString()))
+    }
+    //agents.foreach(_.agent.react(InitEvent("")))
   }
 }
 

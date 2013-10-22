@@ -11,6 +11,7 @@ import mas.simulator.env.Message
 import mas.simulator.agent.event.Events.MessagesEvent
 import scala.Some
 import scala.util.Random
+import java.util.StringTokenizer
 
 /**
  * User: Lugzan
@@ -25,6 +26,9 @@ object Agents {
     protected val autopilot: Autopilot = new MyAutopilot(initPos)
     protected val processingUnit: ProcessingUnit = new MyProcessingUnit
 
+    protected val measurements = new util.HashMap[(Int, Int), Double]
+    protected val lastSent = new util.HashMap[Int, Int]
+
     mainComputer register this
     autopilot register this
     processingUnit register this
@@ -33,14 +37,23 @@ object Agents {
 
     def react(ev: AgentEvent) {
       ev match {
-        case InitEvent(_) =>
+        case InitEvent(msg) =>
           mainComputer.startTimer(1, "a")
-          autopilot.addPoint((Random.nextInt(100), Random.nextInt(100)))
+          val Coordinates = new StringTokenizer(msg)
+          println (msg)
+          while(Coordinates.hasMoreTokens()) {
+            val X = Integer.parseInt(Coordinates.nextToken())
+            val Y = Integer.parseInt(Coordinates.nextToken())
+            autopilot.addPoint((X, Y))
+          }
+        //autopilot.addPoint((Random.nextInt(100), Random.nextInt(100)))
         case TimerEvent(a) =>
-          println(a)
+          //println(a)
           mainComputer.startTimer(1, a + "a")
-        case LocationEvent(_, _) =>
-          autopilot.addPoint((Random.nextInt(100), Random.nextInt(100)))
+        case LocationEvent(point, _) =>
+          measurements.put(point, processingUnit.measure())
+          println("Measured and saved: " + measurements.get(point) + " at " + point.toString())
+        //autopilot.addPoint((Random.nextInt(100), Random.nextInt(100)))
         case _ =>
       }
     }
