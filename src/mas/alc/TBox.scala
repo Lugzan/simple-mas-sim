@@ -24,10 +24,28 @@ sealed trait TBox {
    */
   def isBasic(concept: Concept): Boolean
 
-  def isFeasible(concept: Concept): Boolean
+  def getAll: Seq[Axiom]
 }
 
 object TBox {
+  def newEmpty: TBox = new TBoxImpl
+
+  trait Dividable {
+    this: TBox =>
+
+    def split(i: Inclusion): Either[String, Seq[Axiom]]
+
+    def smartAdd(axiom: Axiom) = axiom match {
+      case i@Inclusion(_, _) => split(i) match {
+        case Left(_) => add(axiom)
+        case Right(defs) => defs foreach {
+          case d => add(d)
+        }
+      }
+      case _ => add(axiom)
+    }
+  }
+
   sealed trait Axiom {
     val left: Concept
     val right: Concept
@@ -217,10 +235,6 @@ object TBox {
       result.toArray
     }
 
-    def isFeasible(concept: Concept): Boolean = {
-      def normalize(c: Concept): Concept = c
-
-      false
-    }
+    def getAll = myAxioms.keySet.toSeq
   }
 }

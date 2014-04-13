@@ -8,6 +8,8 @@ import mas.alc.Concepts.OrConcept
 import mas.alc.ABox.RoleTenancy
 import mas.alc.Individuals.Individual
 import mas.alc.ABox.ConceptTenancy
+import mas.alc.TBox.{Inclusion, Definition}
+import scala.collection.mutable
 
 /**
  * User: Hasp
@@ -136,6 +138,18 @@ object TableRun {
           case Some(Left(aboxChild)) => processABox(aboxChild)
           case Some(Right((aboxChildLeft, aboxChildRight))) => processABox(aboxChildLeft) || processABox(aboxChildRight)
           case None =>
+            val toReplace = new mutable.HashMap[Concept, Concept]()
+
+            def recursiveUpdate(l: Concept, r: Concept) {
+              toReplace.put(l, r) foreach(e => recursiveUpdate(e, r))
+            }
+
+            tbox.getAll foreach {
+              case Definition(Top, right) => if (abox0.reverseFind(NotConcept(right)).isDefined) return false
+              case Definition(Bottom, right) => if (abox0.reverseFind(right).isDefined) return false
+              case Definition(left, right) => recursiveUpdate(left, right)
+              case Inclusion(_, _) =>
+            }
 
             true
         }

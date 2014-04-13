@@ -1,11 +1,14 @@
 package mas.simulator.agent.event
 
-import mas.simulator.env.Message
+import mas.simulator.agent.Agents
+import mas.simulator.env.OuterWorld
 
 /**
  * User: Lugzan
  */
-object Events {
+trait Events {
+  this: Agents with OuterWorld =>
+
   abstract class AgentEvent
 
   /**
@@ -16,7 +19,7 @@ object Events {
   /**
    * Событие, порождаемое автопилотом, когда агент оказывается в одной из заданных точек маршрута
    */
-  case class LocationEvent(point: (Int, Int), msg: String) extends AgentEvent
+  case class LocationEvent(point: Point, msg: String) extends AgentEvent
 
   /**
    * Событие, порождаемое бортовым компьютером, когда он принимает какие-то сообщения
@@ -32,4 +35,20 @@ object Events {
    * Событие, порождаемое в самом начале при инициализации системы
    */
   case class InitEvent(msg: String) extends AgentEvent
+
+  trait EventEmitter {
+    def register(consumer: EventConsumer)
+  }
+
+  trait EventConsumer {
+    def react(ev: AgentEvent)
+  }
+
+  trait SingleWireEmitter extends EventEmitter {
+    var myConsumer: Option[EventConsumer] = None
+
+    def register(consumer: EventConsumer) {
+      myConsumer = Option(consumer)
+    }
+  }
 }

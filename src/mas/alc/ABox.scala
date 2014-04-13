@@ -36,6 +36,8 @@ trait ABox {
 
   def check(fact: Fact): Boolean
 
+  def getPoints: Set[Individual]
+
   def projection(ind: Individual, role: Role) = getAll collect {
     case RoleTenancy(left, right, role1) if role1 == role && left == ind => right
     case RoleTenancy(left, right, role1) if role1 == role && right == ind => left
@@ -44,6 +46,15 @@ trait ABox {
   def consistentByConcept(): Boolean = !getAll.exists{
     case ConceptTenancy(_, Bottom) => true
     case ConceptTenancy(ind, AtomicConcept(name)) => check(ConceptTenancy(ind, NotConcept(AtomicConcept(name))))
+  }
+
+  def reverseFind(concept: Concept) = getAll find {
+    case ConceptTenancy(_, concept1) if concept == concept1 => true
+    case _ => false
+  }
+
+  def reverseFindAll(concept: Concept) = getAll collect {
+    case ConceptTenancy(a, concept1) if concept == concept1 => a
   }
 
   protected def getAll: Iterable[Fact]
@@ -79,11 +90,21 @@ object ABox {
 
     def check(fact: Fact) = facts contains fact
 
+    def getPoints = facts.flatMap {
+      case ConceptTenancy(i, _) => List(i)
+      case RoleTenancy(i, i0, _) => List(i, i0)
+    }.toSet
+
     protected def getAll = facts
   }
 
   private[alc] case class ImmutableABoxImpl(facts: immutable.HashSet[Fact]) extends ImmutableABox {
     def check(fact: Fact) = facts contains fact
+
+    def getPoints = facts.flatMap {
+      case ConceptTenancy(i, _) => List(i)
+      case RoleTenancy(i, i0, _) => List(i, i0)
+    }
 
     protected def addFactImpl(fact: Fact) = ImmutableABoxImpl(facts + fact) withLast Some(fact)
 
