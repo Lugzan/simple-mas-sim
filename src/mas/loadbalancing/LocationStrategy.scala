@@ -8,5 +8,5 @@ trait LocationStrategy {
   /**
    * @return Список узлов, упорядоченных по увеличению степени загрузки
    */
-  def getEligibleNodes(info: InfoStatus): Iterable[AbstractAgent]
+  def getEligibleNodes(hints: Hints.TransferHint, info: InfoStatus): Hints.LocationHint
 }

@@ -6,12 +6,9 @@ package mas.loadbalancing
  */
 trait TransferStrategy {
   /**
-   * @param me Кто отдает задачу
-   * @param receiver Кто получает задачу (канал <Пропускная способность, Агент на другом конце>)
-   * @param task задача
    * @return Следует ли отдавать задачу
    */
-  def shouldTransfer(me: AbstractAgent, receiver: (Int, AbstractAgent), task: Task, info: InfoStatus): Boolean
+  def shouldTransfer(hints: Hints.LocationHint, info: InfoStatus): Hints.TransferHint
 
   /**
    * Видимо, не нужен
