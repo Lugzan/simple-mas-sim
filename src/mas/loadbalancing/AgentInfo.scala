@@ -7,7 +7,7 @@ trait AgentInfo {
   /**
    * @return Список задач, которые отправляются или принимаются в виде (Задача, КомуИлиОтКого, ОтправляетсяЛи)
    */
-  def getCurrentPipesLoad: Iterable[(Task, AgentInfo, Boolean)]
+  def getCurrentPipesLoad: Iterable[(Task, Long, Boolean)]
 
   /**
    * @return Задачи на агенте, которые еще НЕ НАЧАЛИ выполняться
@@ -23,5 +23,5 @@ trait AgentInfo {
   /**
    * @return Список каналов агента, в виде списка (Пропускная способность, Агент на другом конце)
    */
-  def getAllPipes: Iterable[(Double, AgentInfo)]
+  def getAllPipes: Iterable[(Double, Long)]
 }
