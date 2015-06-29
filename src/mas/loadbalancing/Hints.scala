@@ -7,4 +7,12 @@ object Hints {
   trait LocationHint
 
   trait TransferHint
+
+  trait AgentHint extends LocationHint {
+    def getAgent: AbstractAgent
+  }
+
+  trait TaskHint extends TransferHint {
+    def getTask: Task
+  }
 }
