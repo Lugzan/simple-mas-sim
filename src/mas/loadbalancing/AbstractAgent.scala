@@ -73,4 +73,6 @@ trait AbstractAgent extends AgentInfo {
 
   def getTime: Double
   def incrementTime(t: Double): Unit
+
+  private val events = new EventQueue
 }
